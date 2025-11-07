@@ -3,6 +3,7 @@ import '../models/todo.dart';
 import '../repository/todo_repository.dart';
 import '../widgets/add_todo_dialog.dart';
 import '../widgets/todo_item.dart';
+import '../widgets/edit_todo_dialog.dart';
 
 class TodoListPage extends StatefulWidget {
   const TodoListPage({super.key});
@@ -56,7 +57,6 @@ class _TodoListPageState extends State<TodoListPage> {
   void _toggleTodo(int index, bool isCompleted) {
     setState(() {
       _todos[index] = _todos[index].copyWith(isCompleted: isCompleted);
-
     });
     _saveTodos();
   }
@@ -64,9 +64,22 @@ class _TodoListPageState extends State<TodoListPage> {
   void _deleteTodo(int index) {
     setState(() {
       _todos.removeAt(index);
-
     });
     _saveTodos();
+  }
+
+  Future<void> _editTodo(int index) async {
+    final result = await showDialog<Todo>(
+      context: context,
+      builder: (context) => EditTodoDialog(todo: _todos[index]),
+    );
+
+    if (result != null) {
+      setState(() {
+        _todos[index] = result;
+      });
+      await _saveTodos();  // 儲存
+    }
   }
 
   @override
@@ -94,6 +107,7 @@ class _TodoListPageState extends State<TodoListPage> {
             onChanged: (isCompleted) =>
                 _toggleTodo(index, isCompleted),
             onDelete: () => _deleteTodo(index),
+            onTap: () => _editTodo(index) ,
           );
         },
       ),

@@ -5,17 +5,20 @@ class TodoItem extends StatelessWidget {
   final Todo todo;
   final ValueChanged<bool> onChanged;
   final VoidCallback onDelete;
+  final VoidCallback onTap;
 
   const TodoItem({
     super.key,
     required this.todo,
     required this.onChanged,
     required this.onDelete,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     return ListTile(
+      onTap: onTap,
       leading: Checkbox(
         value: todo.isCompleted,
         onChanged: (value) => onChanged(value ?? false),
