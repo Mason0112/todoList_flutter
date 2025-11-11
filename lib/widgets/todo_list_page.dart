@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import '../models/todo.dart';
 import '../repository/todo_repository.dart';
+import '../service/auth_service.dart';
+import '../service_locator.dart';
 import '../widgets/add_todo_dialog.dart';
 import '../widgets/todo_item.dart';
 import '../widgets/edit_todo_dialog.dart';
+import 'login_page.dart';
 
 class TodoListPage extends StatefulWidget {
   const TodoListPage({super.key});
@@ -14,13 +17,14 @@ class TodoListPage extends StatefulWidget {
 
 class _TodoListPageState extends State<TodoListPage> {
   List<Todo> _todos = [];
-  final TodoRepository _repository = TodoRepository();  // ← 加這行
-  bool _isLoading = true;  // ← 加這行
+  final TodoRepository _repository = TodoRepository();
+  final AuthService _authService = getIt<AuthService>();
+  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadTodos();  // ← App 啟動時讀取資料
+    _loadTodos();
   }
 
   Future<void> _loadTodos() async {
@@ -135,12 +139,37 @@ class _TodoListPageState extends State<TodoListPage> {
     }
   }
 
+  Future<void> _logout() async {
+    try {
+      await _authService.logout();
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('登出失敗: $e')),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
         title: const Text('我的待辦事項'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: '登出',
+            onPressed: _logout,
+          ),
+        ],
       ),
       body: _isLoading  // ← 載入時顯示轉圈圈
           ? const Center(child: CircularProgressIndicator())
