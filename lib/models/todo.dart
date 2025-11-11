@@ -1,44 +1,38 @@
 class Todo {
-  final String id;
-  final String title;
-  final bool isCompleted;
-  final DateTime createdAt;
+  final int? id;
+  final String task;
+  final bool completed;
 
   Todo({
-    required this.id,
-    required this.title,
-    required this.isCompleted,
-    required this.createdAt,
+    this.id,
+    required this.task,
+    required this.completed,
   });
 
   // 用於更新部分屬性
   Todo copyWith({
-    String? id,
-    String? title,
+    int? id,
+    String? task,
     bool? isCompleted,
-    DateTime? createdAt,
   }) {
     return Todo(
       id: id ?? this.id,
-      title: title ?? this.title,
-      isCompleted: isCompleted ?? this.isCompleted,
-      createdAt: createdAt ?? this.createdAt,
+      task: task ?? this.task,
+      completed: isCompleted ?? this.completed,
     );
   }
 
   // 轉成 Map（之後存儲用）
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'title': title,
-    'isCompleted': isCompleted,
-    'createdAt': createdAt.toIso8601String(),
+    if (id != null) 'id': id,
+    'task': task,
+    'completed': completed,
   };
 
   // 從 Map 建立（之後讀取用）
   factory Todo.fromJson(Map<String, dynamic> json) => Todo(
     id: json['id'],
-    title: json['title'],
-    isCompleted: json['isCompleted'],
-    createdAt: DateTime.parse(json['createdAt']),
+    task: json['task'],
+    completed: json['completed'],
   );
 }

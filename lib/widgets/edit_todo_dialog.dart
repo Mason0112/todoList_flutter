@@ -18,7 +18,7 @@ class _EditTodoDialogState extends State<EditTodoDialog> {
     if (_controller.text.isNotEmpty) {
       Navigator.pop(
         context,
-        widget.todo.copyWith(title: _controller.text),  // 只改 title
+        widget.todo.copyWith(task: _controller.text),  // 只改 title
       );
     }
   }
@@ -27,7 +27,7 @@ class _EditTodoDialogState extends State<EditTodoDialog> {
   void initState() {
     super.initState();
     // 預填原本的內容
-    _controller = TextEditingController(text: widget.todo.title);
+    _controller = TextEditingController(text: widget.todo.task);
   }
 
   @override

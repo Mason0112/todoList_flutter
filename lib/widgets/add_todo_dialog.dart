@@ -46,10 +46,8 @@ class _AddTodoDialogState extends State<AddTodoDialog> {
       Navigator.pop(
         context,
         Todo(
-          id: DateTime.now().millisecondsSinceEpoch.toString(),
-          title: _controller.text,
-          isCompleted: false,
-          createdAt: DateTime.now(),
+          task: _controller.text,
+          completed: false,
         ),
       );
     }

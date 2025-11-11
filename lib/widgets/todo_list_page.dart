@@ -36,10 +36,6 @@ class _TodoListPageState extends State<TodoListPage> {
     });
   }
 
-  Future<void> _saveTodos() async {
-    await _repository.saveTodos(_todos);
-  }
-
   Future<void> _showAddTodoDialog() async {
     final result = await showDialog<Todo>(
       context: context,
@@ -47,25 +43,70 @@ class _TodoListPageState extends State<TodoListPage> {
     );
 
     if (result != null) {
-      setState(() {
-        _todos.add(result);
-      });
-      await _saveTodos();  // ← 加這行，新增後自動儲存
+      try {
+        // 1. 先透過 API 新增
+        final newTodo = await _repository.createTodo(result.task);
+
+        // 2. 成功後更新 UI
+        setState(() {
+          _todos.add(newTodo);
+        });
+      } catch (e) {
+        // 3. 失敗時顯示錯誤訊息
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('新增失敗: $e')),
+          );
+        }
+      }
     }
   }
 
-  void _toggleTodo(int index, bool isCompleted) {
-    setState(() {
-      _todos[index] = _todos[index].copyWith(isCompleted: isCompleted);
-    });
-    _saveTodos();
+  void _toggleTodo(int index, bool isCompleted) async {
+    try {
+      // 1. 先更新本地狀態 (立即反饋給使用者)
+      final updatedTodo = _todos[index].copyWith(isCompleted: isCompleted);
+      setState(() {
+        _todos[index] = updatedTodo;
+      });
+
+      // 2. 同步到 API
+      await _repository.updateTodo(updatedTodo);
+    } catch (e) {
+      // 3. 失敗時還原並顯示錯誤
+      setState(() {
+        _todos[index] = _todos[index].copyWith(isCompleted: !isCompleted);
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('更新失敗: $e')),
+        );
+      }
+    }
   }
 
-  void _deleteTodo(int index) {
+  void _deleteTodo(int index) async {
+    final todo = _todos[index];
+
     setState(() {
       _todos.removeAt(index);
     });
-    _saveTodos();
+
+    if (todo.id == null) return;
+
+    try {
+      await _repository.deleteTodo(todo.id!);
+    } catch (e) {
+      // 失敗時還原並顯示錯誤
+      setState(() {
+        _todos.insert(index, todo);
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('刪除失敗: $e')),
+        );
+      }
+    }
   }
 
   Future<void> _editTodo(int index) async {
@@ -75,10 +116,22 @@ class _TodoListPageState extends State<TodoListPage> {
     );
 
     if (result != null) {
-      setState(() {
-        _todos[index] = result;
-      });
-      await _saveTodos();  // 儲存
+      try {
+        // 1. 先更新 API
+        final updatedTodo = await _repository.updateTodo(result);
+
+        // 2. 成功後更新 UI
+        setState(() {
+          _todos[index] = updatedTodo;
+        });
+      } catch (e) {
+        // 3. 失敗時顯示錯誤
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('更新失敗: $e')),
+          );
+        }
+      }
     }
   }
 

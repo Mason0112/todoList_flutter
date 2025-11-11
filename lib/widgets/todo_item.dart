@@ -20,19 +20,15 @@ class TodoItem extends StatelessWidget {
     return ListTile(
       onTap: onTap,
       leading: Checkbox(
-        value: todo.isCompleted,
+        value: todo.completed,
         onChanged: (value) => onChanged(value ?? false),
       ),
       title: Text(
-        todo.title,
+        todo.task,
         style: TextStyle(
-          decoration: todo.isCompleted ? TextDecoration.lineThrough : null,
-          color: todo.isCompleted ? Colors.grey : null,
+          decoration: todo.completed ? TextDecoration.lineThrough : null,
+          color: todo.completed ? Colors.grey : null,
         ),
-      ),
-      subtitle: Text(
-        'Created: ${todo.createdAt.toString().substring(0, 16)}',
-        style: const TextStyle(fontSize: 12, color: Colors.grey),
       ),
       trailing: IconButton(
         icon: const Icon(Icons.delete, color: Colors.red),
